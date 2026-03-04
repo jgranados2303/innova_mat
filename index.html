@@ -1,0 +1,1111 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Escape Room Matemático - Currículo Ecuador</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&family=Space+Mono:wght@400;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --ecuador-yellow: #FFD100;
+            --ecuador-blue: #0072CE;
+            --ecuador-red: #CE1126;
+            --dark-bg: #0a0e27;
+            --glass: rgba(255,255,255,0.05);
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1f4b 50%, #0f1535 100%);
+            color: #fff;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .slide {
+            display: none;
+            min-height: 100vh;
+            padding: 2rem;
+            position: relative;
+            animation: fadeIn 0.6s ease-out;
+        }
+        
+        .slide.active {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        
+        /* Efectos de fondo */
+        .bg-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        .floating-shapes {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        .shape {
+            position: absolute;
+            opacity: 0.1;
+            animation: float 20s infinite ease-in-out;
+        }
+        
+        .shape:nth-child(1) { top: 10%; left: 10%; animation-delay: 0s; }
+        .shape:nth-child(2) { top: 70%; right: 10%; animation-delay: 5s; }
+        .shape:nth-child(3) { top: 40%; left: 80%; animation-delay: 10s; }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-30px) rotate(180deg); }
+        }
+        
+        /* Tipografía */
+        .title-main {
+            font-family: 'Space Mono', monospace;
+            font-size: 3.5rem;
+            font-weight: 800;
+            text-align: center;
+            background: linear-gradient(45deg, var(--ecuador-yellow), #fff, var(--ecuador-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 40px rgba(255,209,0,0.3);
+            margin-bottom: 1rem;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .subtitle {
+            font-size: 1.4rem;
+            color: rgba(255,255,255,0.8);
+            text-align: center;
+            margin-bottom: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .narrative-box {
+            background: var(--glass);
+            border: 1px solid rgba(255,209,0,0.3);
+            border-radius: 20px;
+            padding: 2.5rem;
+            max-width: 700px;
+            text-align: center;
+            line-height: 1.8;
+            font-size: 1.1rem;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            position: relative;
+            z-index: 1;
+            margin-bottom: 2rem;
+        }
+        
+        .narrative-box::before {
+            content: '⚠️';
+            font-size: 2rem;
+            display: block;
+            margin-bottom: 1rem;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.1); }
+        }
+        
+        .btn-mission {
+            background: linear-gradient(45deg, var(--ecuador-yellow), var(--ecuador-red));
+            border: none;
+            padding: 1.2rem 3rem;
+            font-size: 1.3rem;
+            color: #0a0e27;
+            font-weight: 800;
+            border-radius: 50px;
+            cursor: pointer;
+            font-family: 'Space Mono', monospace;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 20px rgba(255,209,0,0.4);
+            position: relative;
+            z-index: 1;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .btn-mission:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 8px 30px rgba(255,209,0,0.6);
+        }
+        
+        /* Mapa */
+        .map-title {
+            font-family: 'Space Mono', monospace;
+            font-size: 2.5rem;
+            color: var(--ecuador-yellow);
+            margin-bottom: 1rem;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .map-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.5rem;
+            max-width: 1000px;
+            width: 100%;
+            margin-top: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .zone-node {
+            background: var(--glass);
+            border: 2px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 2rem 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(5px);
+        }
+        
+        .zone-node::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transition: 0.5s;
+        }
+        
+        .zone-node:hover::before {
+            left: 100%;
+        }
+        
+        .zone-node:hover:not(.locked) {
+            transform: translateY(-10px) scale(1.02);
+            border-color: var(--ecuador-yellow);
+            box-shadow: 0 10px 40px rgba(255,209,0,0.2);
+        }
+        
+        .zone-node.locked {
+            opacity: 0.4;
+            cursor: not-allowed;
+            border-color: #444;
+            filter: grayscale(1);
+        }
+        
+        .zone-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+        
+        .zone-name {
+            font-family: 'Space Mono', monospace;
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: #fff;
+        }
+        
+        .zone-status {
+            font-size: 0.85rem;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            background: rgba(255,255,255,0.1);
+            display: inline-block;
+        }
+        
+        .zone-node.completed .zone-status {
+            background: rgba(0,255,0,0.2);
+            color: #00ff88;
+        }
+        
+        .zone-node.locked .zone-status {
+            background: rgba(255,0,0,0.2);
+            color: #ff4444;
+        }
+        
+        /* Retos */
+        .challenge-wrapper {
+            max-width: 800px;
+            width: 100%;
+            background: var(--glass);
+            border-radius: 25px;
+            padding: 3rem;
+            border: 2px solid rgba(0,114,206,0.3);
+            backdrop-filter: blur(10px);
+            position: relative;
+            z-index: 1;
+        }
+        
+        .challenge-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .challenge-icon {
+            font-size: 2.5rem;
+        }
+        
+        .challenge-title {
+            font-family: 'Space Mono', monospace;
+            font-size: 1.8rem;
+            color: var(--ecuador-blue);
+        }
+        
+        .challenge-desc {
+            font-size: 1.1rem;
+            line-height: 1.7;
+            margin-bottom: 2rem;
+            color: rgba(255,255,255,0.9);
+        }
+        
+        .clue-box {
+            background: rgba(255,209,0,0.1);
+            border-left: 4px solid var(--ecuador-yellow);
+            padding: 1.5rem;
+            border-radius: 0 10px 10px 0;
+            margin-bottom: 2rem;
+        }
+        
+        .clue-box h4 {
+            color: var(--ecuador-yellow);
+            margin-bottom: 0.5rem;
+            font-family: 'Space Mono', monospace;
+        }
+        
+        .clue-box ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .clue-box li {
+            padding: 0.3rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+        
+        .clue-box li::before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            color: var(--ecuador-yellow);
+        }
+        
+        .lock-panel {
+            background: rgba(0,0,0,0.3);
+            border-radius: 15px;
+            padding: 2rem;
+            text-align: center;
+            border: 2px solid rgba(255,255,255,0.1);
+        }
+        
+        .lock-display {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .digit-input {
+            width: 70px;
+            height: 80px;
+            background: rgba(255,255,255,0.05);
+            border: 3px solid rgba(255,255,255,0.2);
+            border-radius: 15px;
+            color: var(--ecuador-yellow);
+            font-size: 2rem;
+            font-family: 'Space Mono', monospace;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        
+        .digit-input:focus {
+            outline: none;
+            border-color: var(--ecuador-yellow);
+            box-shadow: 0 0 20px rgba(255,209,0,0.3);
+            transform: scale(1.1);
+        }
+        
+        .btn-verify {
+            background: var(--ecuador-blue);
+            border: none;
+            padding: 1rem 2.5rem;
+            color: white;
+            font-weight: 700;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        .btn-verify:hover {
+            background: var(--ecuador-yellow);
+            color: #0a0e27;
+            transform: translateY(-2px);
+        }
+        
+        .success-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            animation: fadeIn 0.5s;
+        }
+        
+        .success-content {
+            text-align: center;
+            padding: 3rem;
+        }
+        
+        .success-icon {
+            font-size: 5rem;
+            margin-bottom: 1rem;
+            animation: bounce 1s infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .option-card {
+            background: rgba(255,255,255,0.05);
+            border: 2px solid rgba(255,255,255,0.1);
+            padding: 1.2rem;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .option-card:hover {
+            background: rgba(0,114,206,0.2);
+            border-color: var(--ecuador-blue);
+            transform: translateX(10px);
+        }
+        
+        .option-card.selected {
+            background: rgba(0,114,206,0.3);
+            border-color: var(--ecuador-blue);
+        }
+        
+        .option-card.correct {
+            background: rgba(0,255,136,0.2);
+            border-color: #00ff88;
+        }
+        
+        .option-card.wrong {
+            background: rgba(255,0,0,0.2);
+            border-color: #ff4444;
+            animation: shake 0.5s;
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+        
+        .option-letter {
+            background: var(--ecuador-blue);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-family: 'Space Mono', monospace;
+        }
+        
+        .padlet-frame {
+            width: 100%;
+            height: 400px;
+            border: none;
+            border-radius: 15px;
+            background: rgba(255,255,255,0.05);
+            margin-bottom: 1.5rem;
+        }
+        
+        .final-chest {
+            font-size: 6rem;
+            animation: glow 2s infinite alternate;
+            margin-bottom: 2rem;
+        }
+        
+        @keyframes glow {
+            from { filter: drop-shadow(0 0 20px var(--ecuador-yellow)); }
+            to { filter: drop-shadow(0 0 40px var(--ecuador-red)); }
+        }
+        
+        .certificate {
+            background: linear-gradient(135deg, #fff 0%, #f0f0f0 100%);
+            color: #0a0e27;
+            padding: 3rem;
+            border-radius: 20px;
+            max-width: 700px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            border: 8px solid transparent;
+            border-image: linear-gradient(45deg, var(--ecuador-yellow), var(--ecuador-blue), var(--ecuador-red)) 1;
+            position: relative;
+            animation: slideUp 0.8s ease-out;
+        }
+        
+        @keyframes slideUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        .certificate h2 {
+            font-family: 'Space Mono', monospace;
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(45deg, var(--ecuador-blue), var(--ecuador-red));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .certificate-badge {
+            font-size: 4rem;
+            margin: 1rem 0;
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+        
+        .btn-secondary {
+            background: transparent;
+            border: 2px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .btn-secondary:hover {
+            border-color: var(--ecuador-yellow);
+            color: var(--ecuador-yellow);
+        }
+        
+        .progress-tracker {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.5);
+            padding: 1rem;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            z-index: 100;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .progress-dots {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            transition: all 0.3s;
+        }
+        
+        .dot.active {
+            background: var(--ecuador-yellow);
+            box-shadow: 0 0 10px var(--ecuador-yellow);
+        }
+        
+        .dot.completed {
+            background: #00ff88;
+        }
+        
+        @media (max-width: 768px) {
+            .title-main { font-size: 2rem; }
+            .map-grid { grid-template-columns: 1fr; }
+            .challenge-wrapper { padding: 1.5rem; }
+            .digit-input { width: 50px; height: 60px; font-size: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-grid"></div>
+    <div class="floating-shapes">
+        <div class="shape">📐</div>
+        <div class="shape">📏</div>
+        <div class="shape">🔢</div>
+    </div>
+    
+    <div class="progress-tracker">
+        <div class="progress-dots">
+            <div class="dot active" id="dot1"></div>
+            <div class="dot" id="dot2"></div>
+            <div class="dot" id="dot3"></div>
+            <div class="dot" id="dot4"></div>
+            <div class="dot" id="dot5"></div>
+            <div class="dot" id="dot6"></div>
+        </div>
+    </div>
+
+    <!-- DIAPOSITIVA 1: PORTADA -->
+    <div class="slide active" id="slide1">
+        <h1 class="title-main">🔐 ESCAPE ROOM MATEMÁTICO</h1>
+        <p class="subtitle">Currículo de Matemática en la Educación Ecuatoriana</p>
+        
+        <div class="narrative-box">
+            <p><strong>El currículo matemático ha sido alterado.</strong></p>
+            <p>Las finalidades y metas han sido bloqueadas por un virus pedagógico.</p>
+            <p>Solo quienes comprendan verdaderamente el sentido del currículo ecuatoriano podrán restaurar el sistema educativo.</p>
+        </div>
+        
+        <button class="btn-mission" onclick="goToSlide(2)">
+            ▶ Iniciar Misión
+        </button>
+    </div>
+
+    <!-- DIAPOSITIVA 2: MAPA -->
+    <div class="slide" id="slide2">
+        <h2 class="map-title">🗺️ Sistema del Currículo Matemático</h2>
+        <p class="subtitle">Explora cada zona y desbloquea el currículo</p>
+        
+        <div class="map-grid">
+            <div class="zone-node" onclick="goToSlide(3)" id="zone-trad">
+                <span class="zone-icon">🏫</span>
+                <div class="zone-name">Aula Tradicional</div>
+                <span class="zone-status" id="status-trad">Pendiente</span>
+            </div>
+            
+            <div class="zone-node" onclick="goToSlide(4)" id="zone-arch">
+                <span class="zone-icon">📚</span>
+                <div class="zone-name">Archivo Curricular</div>
+                <span class="zone-status" id="status-arch">Pendiente</span>
+            </div>
+            
+            <div class="zone-node" onclick="goToSlide(5)" id="zone-pisa">
+                <span class="zone-icon">🌍</span>
+                <div class="zone-name">Centro PISA</div>
+                <span class="zone-status" id="status-pisa">Pendiente</span>
+            </div>
+            
+            <div class="zone-node" onclick="goToSlide(6)" id="zone-inn">
+                <span class="zone-icon">🧱</span>
+                <div class="zone-name">Muro de Innovación</div>
+                <span class="zone-status" id="status-inn">Pendiente</span>
+            </div>
+            
+            <div class="zone-node locked" onclick="checkFinal()" id="zone-final">
+                <span class="zone-icon">🧰</span>
+                <div class="zone-name">Cámara Final</div>
+                <span class="zone-status" id="status-final">🔒 Bloqueada</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- DIAPOSITIVA 3: AULA TRADICIONAL -->
+    <div class="slide" id="slide3">
+        <div class="challenge-wrapper">
+            <div class="challenge-header">
+                <span class="challenge-icon">🏫</span>
+                <h2 class="challenge-title">El Código del Bachiller</h2>
+            </div>
+            
+            <p class="challenge-desc">
+                Para escapar del <strong>Aula Tradicional</strong> debes descifrar el código de tres cifras que abre las puertas del currículo moderno.
+            </p>
+            
+            <div class="clue-box">
+                <h4>🔍 Pistas del Sistema:</h4>
+                <ul>
+                    <li>1ª cifra: Número de pilares del perfil de salida del bachiller</li>
+                    <li>2ª cifra: Número de bloques curriculares de Matemática</li>
+                    <li>3ª cifra: Último dígito del año del ajuste curricular más reciente (2023)</li>
+                </ul>
+            </div>
+            
+            <div class="lock-panel">
+                <div class="lock-display">
+                    <input type="number" class="digit-input" id="dig1" min="0" max="9" placeholder="0">
+                    <input type="number" class="digit-input" id="dig2" min="0" max="9" placeholder="0">
+                    <input type="number" class="digit-input" id="dig3" min="0" max="9" placeholder="0">
+                </div>
+                <button class="btn-verify" onclick="verifyRoom3()">🔓 Desbloquear</button>
+            </div>
+            
+            <div style="margin-top: 2rem; text-align: center;">
+                <button class="btn-secondary" onclick="goToSlide(2)">⬅ Volver al Mapa</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- DIAPOSITIVA 4: ARCHIVO CURRICULAR -->
+    <div class="slide" id="slide4">
+        <div class="challenge-wrapper">
+            <div class="challenge-header">
+                <span class="challenge-icon">📚</span>
+                <h2 class="challenge-title">Finalidades del Currículo</h2>
+            </div>
+            
+            <p class="challenge-desc">
+                El currículo de Matemática del Ecuador busca formar ciudadanos capaces de resolver problemas reales mediante el pensamiento lógico-matemático.
+            </p>
+            
+            <div class="clue-box">
+                <h4>📖 Recuerda:</h4>
+                <p>Según el Ministerio de Educación, el currículo prioriza el desarrollo de capacidades sobre la memorización mecánica.</p>
+            </div>
+            
+            <h3 style="margin-bottom: 1rem; color: var(--ecuador-yellow);">¿Cuál es la finalidad principal?</h3>
+            
+            <div class="options-list">
+                <div class="option-card" onclick="selectOption(this, 'A', 4)">
+                    <span class="option-letter">A</span>
+                    <span>Memorizar fórmulas y algoritmos</span>
+                </div>
+                <div class="option-card" onclick="selectOption(this, 'B', 4)">
+                    <span class="option-letter">B</span>
+                    <span>Desarrollar pensamiento lógico, resolución de problemas y toma de decisiones</span>
+                </div>
+                <div class="option-card" onclick="selectOption(this, 'C', 4)">
+                    <span class="option-letter">C</span>
+                    <span>Repetir ejercicios hasta la automatización</span>
+                </div>
+                <div class="option-card" onclick="selectOption(this, 'D', 4)">
+                    <span class="option-letter">D</span>
+                    <span>Calcular rápidamente sin comprensión</span>
+                </div>
+            </div>
+            
+            <div style="text-align: center;">
+                <button class="btn-secondary" onclick="goToSlide(2)">⬅ Volver al Mapa</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- DIAPOSITIVA 5: CENTRO PISA -->
+    <div class="slide" id="slide5">
+        <div class="challenge-wrapper">
+            <div class="challenge-header">
+                <span class="challenge-icon">🌍</span>
+                <h2 class="challenge-title">Comparación Internacional</h2>
+            </div>
+            
+            <p class="challenge-desc">
+                Ecuador busca mejorar su desempeño en PISA. Estudia las estrategias de países líderes y adapta una al contexto nacional.
+            </p>
+            
+            <div class="clue-box">
+                <h4>🌐 Investiga:</h4>
+                <ul>
+                    <li><strong>Finlandia:</strong> Enfoque en pensamiento crítico, menos tareas memorísticas</li>
+                    <li><strong>Singapur:</strong> Método de modelos visuales (Model Method)</li>
+                    <li><strong>Canadá:</strong> Matemáticas contextualizadas a problemas reales</li>
+                </ul>
+            </div>
+            
+            <h3 style="margin-bottom: 1rem; color: var(--ecuador-yellow);">¿Qué estrategia adaptarías al currículo ecuatoriano?</h3>
+            
+            <div class="options-list">
+                <div class="option-card" onclick="selectPisa(this, 'singapur')">
+                    <span class="option-letter">🇸🇬</span>
+                    <span>Modelo de Singapur (método visual y concreto)</span>
+                </div>
+                <div class="option-card" onclick="selectPisa(this, 'finlandia')">
+                    <span class="option-letter">🇫🇮</span>
+                    <span>Enfoque de Finlandia (autonomía y pensamiento crítico)</span>
+                </div>
+                <div class="option-card" onclick="selectPisa(this, 'canada')">
+                    <span class="option-letter">🇨🇦</span>
+                    <span>Matemáticas contextualizadas de Canadá</span>
+                </div>
+            </div>
+            
+            <div style="text-align: center; margin-top: 2rem;">
+                <button class="btn-mission" onclick="completePisa()" style="display: none;" id="btn-pisa">
+                    ➡ Ir al Muro de Innovación
+                </button>
+                <button class="btn-secondary" onclick="goToSlide(2)" style="margin-left: 1rem;">
+                    ⬅ Volver al Mapa
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- DIAPOSITIVA 6: MURO DE INNOVACIÓN -->
+    <div class="slide" id="slide6">
+        <div class="challenge-wrapper">
+            <div class="challenge-header">
+                <span class="challenge-icon">🧱</span>
+                <h2 class="challenge-title">Muro de Innovación</h2>
+            </div>
+            
+            <p class="challenge-desc">
+                Publica una propuesta pedagógica que combine el currículo ecuatoriano con la técnica internacional seleccionada.
+            </p>
+            <iframe src="https://padlet.com/jgranados23/innovaciones-pedag-gicas-en-la-ense-anza-de-las-matem-ticas-ea0x7gs2bjbpo0ea" class="padlet-frame"></iframe>
+
+            <div class="clue-box">
+                <h4>💡 Tu misión:</h4>
+                <p>Escribe en el padlet cómo implementarías esta estrategia en tu aula, considerando el perfil de salida del bachiller ecuatoriano.</p>
+            </div>
+            
+            <!-- Simulación de Padlet (en Genially puedes incrustar el iframe real) -->
+            <div style="background: rgba(255,255,255,0.05); border-radius: 15px; padding: 2rem; margin-bottom: 1.5rem; min-height: 300px; border: 2px dashed rgba(255,255,255,0.2);">
+                <p style="text-align: center; color: rgba(255,255,255,0.5); margin-bottom: 1rem;">
+                    📝 Área de contribución colaborativa
+                </p>
+                <textarea id="innovation-text" placeholder="Escribe aquí tu propuesta pedagógica..." 
+                    style="width: 100%; height: 150px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.2); 
+                    border-radius: 10px; padding: 1rem; color: white; font-family: inherit; resize: vertical;"></textarea>
+                <button class="btn-verify" onclick="postInnovation()" style="margin-top: 1rem; width: 100%;">
+                    📌 Publicar Propuesta
+                </button>
+            </div>
+            
+            <div style="text-align: center;">
+                <button class="btn-mission" onclick="goToSlide(7)" style="display: none;" id="btn-to-final">
+                    ➡ Ir a la Cámara Final
+                </button>
+                <button class="btn-secondary" onclick="goToSlide(2)">
+                    ⬅ Volver al Mapa
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- DIAPOSITIVA 7: CÁMARA FINAL -->
+    <div class="slide" id="slide7">
+        <div class="challenge-wrapper" style="text-align: center;">
+            <div class="final-chest">🧰</div>
+            <h2 class="challenge-title" style="justify-content: center; color: var(--ecuador-red);">
+                Activación del Nuevo Currículo
+            </h2>
+            
+            <p class="challenge-desc">
+                Última barrera de seguridad. Demuestra que comprendes cómo la innovación transforma la educación ecuatoriana.
+            </p>
+            
+            <h3 style="margin: 2rem 0 1rem; color: var(--ecuador-yellow);">
+                ¿Cómo tributa la innovación pedagógica al perfil de salida del bachiller?
+            </h3>
+            
+            <div class="options-list" style="text-align: left;">
+                <div class="option-card" onclick="selectFinal(this, 'A')">
+                    <span class="option-letter">A</span>
+                    <span>No influye en el perfil de salida</span>
+                </div>
+                <div class="option-card" onclick="selectFinal(this, 'B')">
+                    <span class="option-letter">B</span>
+                    <span>Desarrolla justicia, pensamiento crítico e innovación (pilares del perfil)</span>
+                </div>
+                <div class="option-card" onclick="selectFinal(this, 'C')">
+                    <span class="option-letter">C</span>
+                    <span>Solo mejora las notas en matemáticas</span>
+                </div>
+                <div class="option-card" onclick="selectFinal(this, 'D')">
+                    <span class="option-letter">D</span>
+                    <span>Solo aumenta la velocidad de cálculo</span>
+                </div>
+            </div>
+            
+            <button class="btn-secondary" onclick="goToSlide(2)">
+                ⬅ Volver al Mapa
+            </button>
+        </div>
+    </div>
+
+    <!-- DIAPOSITIVA 8: FINAL -->
+    <div class="slide" id="slide8">
+        <div class="certificate">
+            <div class="certificate-badge">🏆</div>
+            <h2>¡MISIÓN CUMPLIDA!</h2>
+            <h3 style="color: #666; margin-bottom: 1rem;">Arquitecto del Pensamiento Lógico</h3>
+            
+            <div style="margin: 2rem 0; line-height: 1.8;">
+                <p>Se certifica que has completado el <strong>Escape Room del Currículo Matemático Ecuatoriano</strong></p>
+                <p style="margin-top: 1rem; font-size: 0.9rem; color: #666;">
+                    Has demostrado comprensión de:<br>
+                    ✅ Perfil de salida del bachiller<br>
+                    ✅ Finalidades del currículo<br>
+                    ✅ Comparación internacional PISA<br>
+                    ✅ Innovación pedagógica
+                </p>
+            </div>
+            
+            <p style="font-family: 'Space Mono', monospace; color: #999; font-size: 0.8rem; margin-top: 2rem;">
+                ECUADOR - MINISTERIO DE EDUCACIÓN<br>
+                <span id="cert-date"></span>
+            </p>
+            
+            <div class="btn-group" style="margin-top: 2rem;">
+                <button class="btn-mission" onclick="downloadCertificate()">
+                    📜 Descargar Certificado
+                </button>
+                <button class="btn-secondary" onclick="location.reload()" style="color: #0a0e27; border-color: #0a0e27;">
+                    🔄 Volver a Jugar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Overlay de éxito -->
+    <div class="success-overlay" id="successOverlay">
+        <div class="success-content">
+            <div class="success-icon">✅</div>
+            <h2 style="font-family: 'Space Mono', monospace; color: #00ff88; font-size: 2rem; margin-bottom: 1rem;">
+                ¡Zona Desbloqueada!
+            </h2>
+            <p style="font-size: 1.2rem; margin-bottom: 2rem;" id="successMessage"></p>
+            <button class="btn-mission" onclick="closeSuccess()">Continuar</button>
+        </div>
+    </div>
+
+    <script>
+        // Estado del juego
+        const state = {
+            current: 1,
+            completed: {
+                trad: false,
+                arch: false,
+                pisa: false,
+                inn: false
+            },
+            pisaStrategy: null,
+            finalAnswer: null
+        };
+
+        // Navegación
+        function goToSlide(n) {
+            document.querySelectorAll('.slide').forEach(s => s.classList.remove('active'));
+            document.getElementById('slide' + n).classList.add('active');
+            state.current = n;
+            updateDots();
+            
+            if (n === 8) {
+                document.getElementById('cert-date').textContent = new Date().toLocaleDateString('es-EC');
+            }
+        }
+
+        function updateDots() {
+            for (let i = 1; i <= 6; i++) {
+                const dot = document.getElementById('dot' + i);
+                if (i < state.current) dot.classList.add('completed');
+                else if (i === state.current) dot.classList.add('active');
+                else dot.classList.remove('active', 'completed');
+            }
+        }
+
+        // Sala 3: Código numérico
+        function verifyRoom3() {
+            const d1 = document.getElementById('dig1').value;
+            const d2 = document.getElementById('dig2').value;
+            const d3 = document.getElementById('dig3').value;
+            
+            // Respuesta: 5 pilares, 3 bloques (Algebra/Geometria/Estadistica), 3 (2023)
+            const code = d1 + d2 + d3;
+            
+            if (code === '533') {
+                state.completed.trad = true;
+                showSuccess('Has desbloqueado el Aula Tradicional. ¡Bienvenido al currículo moderno!');
+                document.getElementById('zone-trad').classList.add('completed');
+                document.getElementById('status-trad').textContent = '✅ Completado';
+                checkAllCompleted();
+            } else {
+                shakeInputs();
+            }
+        }
+
+        function shakeInputs() {
+            document.querySelectorAll('.digit-input').forEach(input => {
+                input.style.animation = 'shake 0.5s';
+                input.style.borderColor = '#ff4444';
+                setTimeout(() => {
+                    input.style.animation = '';
+                    input.value = '';
+                    input.style.borderColor = '';
+                }, 500);
+            });
+        }
+
+        // Sala 4: Opción múltiple
+        function selectOption(card, option, room) {
+            document.querySelectorAll('.option-card').forEach(c => c.classList.remove('selected'));
+            card.classList.add('selected');
+            
+            if (option === 'B') {
+                setTimeout(() => {
+                    card.classList.add('correct');
+                    state.completed.arch = true;
+                    showSuccess('¡Correcto! El currículo busca desarrollar capacidades, no solo memorizar.');
+                    document.getElementById('zone-arch').classList.add('completed');
+                    document.getElementById('status-arch').textContent = '✅ Completado';
+                    checkAllCompleted();
+                }, 500);
+            } else {
+                setTimeout(() => {
+                    card.classList.add('wrong');
+                    setTimeout(() => card.classList.remove('wrong', 'selected'), 1000);
+                }, 500);
+            }
+        }
+
+        // Sala 5: PISA
+        function selectPisa(card, strategy) {
+            document.querySelectorAll('#slide5 .option-card').forEach(c => c.classList.remove('selected'));
+            card.classList.add('selected');
+            state.pisaStrategy = strategy;
+            document.getElementById('btn-pisa').style.display = 'inline-block';
+        }
+
+        function completePisa() {
+            state.completed.pisa = true;
+            document.getElementById('zone-pisa').classList.add('completed');
+            document.getElementById('status-pisa').textContent = '✅ Completado';
+            goToSlide(6);
+            checkAllCompleted();
+        }
+
+        // Sala 6: Innovación
+        function postInnovation() {
+            const text = document.getElementById('innovation-text').value;
+            if (text.length > 20) {
+                state.completed.inn = true;
+                document.getElementById('zone-inn').classList.add('completed');
+                document.getElementById('status-inn').textContent = '✅ Completado';
+                document.getElementById('btn-to-final').style.display = 'inline-block';
+                showSuccess('¡Propuesta publicada! Has contribuido al muro de innovación.');
+                checkAllCompleted();
+            } else {
+                alert('Por favor, escribe una propuesta más detallada (mínimo 20 caracteres).');
+            }
+        }
+
+        // Sala 7: Final
+        function selectFinal(card, option) {
+            document.querySelectorAll('#slide7 .option-card').forEach(c => c.classList.remove('selected'));
+            card.classList.add('selected');
+            
+            if (option === 'B') {
+                setTimeout(() => {
+                    card.classList.add('correct');
+                    setTimeout(() => goToSlide(8), 1000);
+                }, 500);
+            } else {
+                setTimeout(() => {
+                    card.classList.add('wrong');
+                    setTimeout(() => card.classList.remove('wrong', 'selected'), 1000);
+                }, 500);
+            }
+        }
+
+        // Verificar acceso final
+        function checkFinal() {
+            if (Object.values(state.completed).every(v => v)) {
+                goToSlide(7);
+            } else {
+                alert('🔒 Debes completar las 4 zonas anteriores para acceder a la Cámara Final.');
+            }
+        }
+
+        function checkAllCompleted() {
+            if (Object.values(state.completed).every(v => v)) {
+                document.getElementById('zone-final').classList.remove('locked');
+                document.getElementById('status-final').textContent = '🔓 Desbloqueada';
+                document.getElementById('status-final').style.color = '#00ff88';
+            }
+        }
+
+        // UI Helpers
+        function showSuccess(msg) {
+            document.getElementById('successMessage').textContent = msg;
+            document.getElementById('successOverlay').style.display = 'flex';
+        }
+
+        function closeSuccess() {
+            document.getElementById('successOverlay').style.display = 'none';
+            goToSlide(2);
+        }
+
+        function downloadCertificate() {
+            alert('📜 Certificado descargado: Arquitecto_del_Pensamiento_Logico.pdf');
+        }
+
+        // Auto-avance de inputs en sala 3
+        document.querySelectorAll('.digit-input').forEach((input, index) => {
+            input.addEventListener('input', (e) => {
+                if (e.target.value.length === 1 && index < 2) {
+                    document.querySelectorAll('.digit-input')[index + 1].focus();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
